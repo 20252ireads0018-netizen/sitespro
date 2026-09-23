@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreOnboardingRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\OnboardingRequest;
 
 class OnboardingController extends Controller
 {
@@ -48,16 +49,11 @@ class OnboardingController extends Controller
 
         $payload['images'] = $imagePaths;
 
-        // 3. Persistência -------------------------------------------------
-        // Quando a tabela existir, substitua a linha abaixo por algo como:
-        //
-        //     $onboarding = OnboardingRequest::create($payload);
-        //
-        // (ver migration sugerida: create_onboarding_requests_table)
-        //
-        // Por enquanto, apenas registramos no log para conferência:
+        // 3. Salva a solicitação no banco de dados
+        $onboarding = OnboardingRequest::create($payload);
+
+        // Também registra no log para conferência
         logger()->info('Nova solicitação de onboarding recebida', $payload);
-        // -------------------------------------------------------------------
 
         $mensagem = $payload['request_type'] === 'teste'
             ? 'Recebemos sua solicitação de site teste! Em breve entraremos em contato.'
@@ -81,7 +77,7 @@ class OnboardingController extends Controller
      */
     public function humanContact()
     {
-        return view('onboarding.human-contact');
+        return view('contact.human');
     }
 
     /**
