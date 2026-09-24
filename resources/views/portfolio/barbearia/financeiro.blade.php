@@ -1,0 +1,230 @@
+@extends('portfolio.barbearia.appBarbearia')
+
+@section('title', 'Financeiro')
+
+@section('content')
+
+<div class="min-h-screen bg-white text-slate-800 flex">
+
+    <aside class="w-64 min-h-screen bg-white border-r border-purple-100
+                  flex flex-col fixed left-0 top-0 bottom-0 z-50 shadow-sm">
+
+        <div class="px-6 py-8 border-b border-purple-100">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-purple-800
+                            flex items-center justify-center shadow-lg shadow-purple-200">
+                    <span class="text-xl text-white">✂</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wide text-slate-900">BARBEARIA</h1>
+                    <p class="text-[10px] text-purple-500 tracking-[0.25em]">ESTILO • DISCIPLINA</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-4 py-6">
+            <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 px-3 mb-3">Menu</p>
+
+            @php
+                $menuItems = [
+                    ['label' => 'Agenda',       'icon' => '▣', 'route' => 'barbearia.agenda'],
+                    ['label' => 'Financeiro',   'icon' => '◉', 'route' => 'barbearia.financeiro'],
+                    ['label' => 'Maquinário',   'icon' => '⚙', 'route' => 'barbearia.maquinario'],
+                    ['label' => 'Funcionário',  'icon' => '♙', 'route' => 'barbearia.funcionario'],
+                ];
+            @endphp
+
+            @foreach ($menuItems as $item)
+                @php
+                    $isActive = Route::has($item['route']) && request()->routeIs($item['route']);
+                    $href = Route::has($item['route']) ? route($item['route']) : '#';
+                @endphp
+                <a href="{{ $href }}"
+                   class="menu-item group flex items-center gap-4 px-4 py-3.5 rounded-xl mb-2
+                          transition-all duration-200
+                          {{ $isActive
+                                ? 'bg-purple-600 text-white shadow-md shadow-purple-200'
+                                : 'text-slate-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
+                    <span class="text-xl">{{ $item['icon'] }}</span>
+                    <span class="font-medium">{{ $item['label'] }}</span>
+                </a>
+            @endforeach
+        </nav>
+
+        <div class="p-5 border-t border-purple-100">
+            <div class="rounded-xl bg-purple-50 border border-purple-100 p-4">
+                <p class="text-xs text-slate-500">Sistema da</p>
+                <p class="text-sm font-semibold text-purple-700 mt-1">Barbearia</p>
+                <p class="text-[10px] text-slate-400 mt-2">Painel administrativo</p>
+            </div>
+        </div>
+
+    </aside>
+
+
+    <main class="ml-64 flex-1 min-h-screen bg-slate-50">
+
+        <header class="h-20 border-b border-purple-100 bg-white/80 backdrop-blur-xl
+                       flex items-center justify-between px-8">
+            <div>
+                <p class="text-sm text-slate-400">Painel administrativo</p>
+                <h2 class="text-xl font-semibold mt-1 text-slate-900">Financeiro</h2>
+            </div>
+        </header>
+
+        <div class="p-8">
+
+            @php
+                $nomesMeses = [
+                    1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março', 4 => 'Abril',
+                    5 => 'Maio', 6 => 'Junho', 7 => 'Julho', 8 => 'Agosto',
+                    9 => 'Setembro', 10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro',
+                ];
+                $agora = now();
+                $nomeMesAtual = $nomesMeses[(int) $agora->format('n')];
+                $anoAtual = $agora->format('Y');
+
+                $resumoMes = $resumoMes ?? [
+                    'faturamento' => 8420.00,
+                    'gastos' => 2150.00,
+                    'agendamentosMes' => 132,
+                    'variacaoFaturamento' => 18,
+                    'variacaoGastos' => -6,
+                    'variacaoAgendamentos' => 9,
+                ];
+                $lucro = $resumoMes['faturamento'] - $resumoMes['gastos'];
+
+                $serieMes = $serieMes ?? [
+                    ['label' => 'Semana 1', 'faturamento' => 1850, 'gastos' => 480],
+                    ['label' => 'Semana 2', 'faturamento' => 2100, 'gastos' => 520],
+                    ['label' => 'Semana 3', 'faturamento' => 1980, 'gastos' => 560],
+                    ['label' => 'Semana 4', 'faturamento' => 2490, 'gastos' => 590],
+                ];
+                $maxSerie = max(array_map(fn ($d) => max($d['faturamento'], $d['gastos']), $serieMes));
+            @endphp
+
+            <div class="bg-white border border-purple-100 rounded-2xl p-6 shadow-sm">
+
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">Financeiro do mês</h2>
+                        <p class="text-sm text-slate-400 mt-1">
+                            Faturamento, gastos e agendamentos de <strong class="text-purple-600">{{ $nomeMesAtual }} de {{ $anoAtual }}</strong>
+                        </p>
+                    </div>
+                    <span class="text-purple-600 text-xl">$</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+
+                    <div class="rounded-xl border border-purple-100 bg-purple-50/40 p-5">
+                        <p class="text-sm text-slate-500">Faturamento</p>
+                        <p class="text-2xl font-bold mt-2 text-slate-900">
+                            R$ {{ number_format($resumoMes['faturamento'], 2, ',', '.') }}
+                        </p>
+                        <p class="text-xs {{ $resumoMes['variacaoFaturamento'] >= 0 ? 'text-emerald-600' : 'text-red-500' }} mt-2">
+                            {{ $resumoMes['variacaoFaturamento'] >= 0 ? '↑' : '↓' }} {{ abs($resumoMes['variacaoFaturamento']) }}% este mês
+                        </p>
+                    </div>
+
+                    <div class="rounded-xl border border-purple-100 bg-purple-50/40 p-5">
+                        <p class="text-sm text-slate-500">Gastos</p>
+                        <p class="text-2xl font-bold mt-2 text-slate-900">
+                            R$ {{ number_format($resumoMes['gastos'], 2, ',', '.') }}
+                        </p>
+                        <p class="text-xs {{ $resumoMes['variacaoGastos'] <= 0 ? 'text-emerald-600' : 'text-red-500' }} mt-2">
+                            {{ $resumoMes['variacaoGastos'] >= 0 ? '↑' : '↓' }} {{ abs($resumoMes['variacaoGastos']) }}% este mês
+                        </p>
+                    </div>
+
+                    <div class="rounded-xl border border-purple-100 bg-purple-50/40 p-5">
+                        <p class="text-sm text-slate-500">Agendamentos no mês</p>
+                        <p class="text-2xl font-bold mt-2 text-slate-900">
+                            {{ $resumoMes['agendamentosMes'] }}
+                        </p>
+                        <p class="text-xs {{ $resumoMes['variacaoAgendamentos'] >= 0 ? 'text-emerald-600' : 'text-red-500' }} mt-2">
+                            {{ $resumoMes['variacaoAgendamentos'] >= 0 ? '↑' : '↓' }} {{ abs($resumoMes['variacaoAgendamentos']) }}% este mês
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="flex items-center justify-between rounded-xl bg-purple-600/5 border border-purple-100 px-5 py-4 mb-8">
+                    <span class="text-sm text-slate-500">Lucro estimado (faturamento − gastos)</span>
+                    <span class="text-lg font-bold text-purple-700">
+                        R$ {{ number_format($lucro, 2, ',', '.') }}
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <h3 class="text-sm font-semibold text-slate-700">
+                        Comparativo semanal — {{ $nomeMesAtual }} de {{ $anoAtual }}
+                    </h3>
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center gap-2 text-xs text-slate-500">
+                            <span class="w-3 h-3 rounded-sm bg-purple-500 inline-block"></span> Faturamento
+                        </span>
+                        <span class="flex items-center gap-2 text-xs text-slate-500">
+                            <span class="w-3 h-3 rounded-sm bg-rose-300 inline-block"></span> Gastos
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex items-end gap-6 h-44 pt-8">
+                    @foreach ($serieMes as $d)
+                        <div class="relative flex-1 flex flex-col items-center gap-1"
+                             x-data="{ open: false }"
+                             @mouseenter="open = true"
+                             @mouseleave="open = false">
+
+                            <div x-show="open" x-cloak x-transition
+                                 class="absolute bottom-full mb-2 z-50 w-52
+                                        bg-white border border-purple-100 rounded-xl shadow-xl p-4
+                                        left-1/2 -translate-x-1/2">
+                                <p class="text-sm font-semibold text-slate-900">{{ $d['label'] }}</p>
+                                <p class="text-xs text-slate-500 mt-2 flex items-center justify-between gap-2">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-sm bg-purple-500 inline-block"></span>
+                                        Faturamento
+                                    </span>
+                                    <span class="font-medium text-slate-900">
+                                        R$ {{ number_format($d['faturamento'], 2, ',', '.') }}
+                                    </span>
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1 flex items-center justify-between gap-2">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-sm bg-rose-300 inline-block"></span>
+                                        Gastos
+                                    </span>
+                                    <span class="font-medium text-slate-900">
+                                        R$ {{ number_format($d['gastos'], 2, ',', '.') }}
+                                    </span>
+                                </p>
+                                <p class="text-xs text-purple-600 mt-2 pt-2 border-t border-purple-50 flex items-center justify-between">
+                                    <span>Saldo</span>
+                                    <span class="font-semibold">
+                                        R$ {{ number_format($d['faturamento'] - $d['gastos'], 2, ',', '.') }}
+                                    </span>
+                                </p>
+                            </div>
+
+                            <div class="w-full flex items-end justify-center gap-1.5 h-32 cursor-default">
+                                <div class="w-1/2 bg-purple-500 rounded-t transition-all duration-150 hover:bg-purple-600"
+                                     style="height: {{ round(($d['faturamento'] / $maxSerie) * 100) }}%"></div>
+                                <div class="w-1/2 bg-rose-300 rounded-t transition-all duration-150 hover:bg-rose-400"
+                                     style="height: {{ round(($d['gastos'] / $maxSerie) * 100) }}%"></div>
+                            </div>
+                            <span class="text-[11px] text-slate-500 mt-1">{{ $d['label'] }}</span>
+                        </div>
+                    @endforeach
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+@endsection

@@ -59,7 +59,7 @@
                     'url' => '#',
                 ],
                 [
-                    'titulo' => 'Barbearia',
+                    'titulo' => 'Barbearia Purple Elegance',
                     'descricao' => 'Site simples e direto com agenda de horários e localização integrada ao mapa.',
                     'tag' => 'Agendamento',
                     'cor' => 'from-indigo-500 to-violet-600',
