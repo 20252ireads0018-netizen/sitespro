@@ -11,3 +11,6 @@ Route::get('/falar-com-humano', [OnboardingController::class, 'humanContact'])->
 Route::post('/falar-com-humano', [OnboardingController::class, 'storeHumanContact'])->name('contact.human.store');
 
 Route::view('/portfolio', 'portfolio.index')->name('portfolio.index');
+Route::get('/siteBarbearia', function(){
+    return view('portfolio.siteBarbearia');
+})->name('siteBarbearia');
