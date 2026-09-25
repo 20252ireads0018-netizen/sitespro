@@ -8,10 +8,10 @@
     <!-- Cabeçalho -->
     <div class="text-center mb-12">
         <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-brand-700 via-brand-500 to-brand-400 bg-clip-text text-transparent">
-            Nosso portfólio
+            Sites de Exemplo
         </h1>
         <p class="mt-3 text-slate-500 max-w-xl mx-auto">
-            Alguns exemplos de sites que já criamos. Clique em um card para ver os detalhes.
+            Alguns exemplos visuais de como sua operação pode funcionar.
         </p>
         <a href="{{ route('onboarding.index') }}"
            class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-brand-600 hover:text-brand-800 transition-colors duration-200">

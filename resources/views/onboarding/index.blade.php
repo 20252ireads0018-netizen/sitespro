@@ -174,7 +174,11 @@
             <span x-show="step === 1" class="order-2 sm:order-1"></span>
 
             <button type="button" @click="next()" x-show="step < totalSteps" x-cloak
-                    class="w-full sm:w-auto sm:ml-auto order-1 sm:order-2 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-md hover:shadow-brand-500/30">
+                    :disabled="!isStepValid"
+                    :class="isStepValid
+                        ? 'bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white opacity-100 cursor-pointer hover:shadow-md hover:shadow-brand-500/30'
+                        : 'bg-gradient-to-r from-brand-600 to-brand-500 text-white opacity-40 cursor-not-allowed'"
+                    class="w-full sm:w-auto sm:ml-auto order-1 sm:order-2 font-medium px-6 py-3 rounded-lg transition-all duration-200">
                 Próximo →
             </button>
 
@@ -412,6 +416,7 @@
 </style>
 
 <script>
+
     function onboardingWizard() {
         return {
             step: 1,
@@ -433,6 +438,15 @@
                 // Etapa 1 → gráfico 1, Etapa 2 → gráfico 2, Etapa 3 → gráfico 3,
                 // Etapas 4 e 5 → gráfico 4 (não há um 5º gráfico)
                 return Math.min(this.step, 4);
+            },
+            get isStepValid() {
+                switch (this.step) {
+                    case 1: return this.data.business_type.trim() !== '';
+                    case 2: return this.data.business_size !== '';
+                    case 3: return this.data.sales_volume !== '';
+                    case 4: return this.data.organization_method !== '';
+                    default: return true;
+                }
             },
             next() {
                 if (this.step < this.totalSteps) this.step++;

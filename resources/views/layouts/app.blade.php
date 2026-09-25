@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Criação de Sites para Empresas') | Web-Sight</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     </a>
@@ -47,7 +47,7 @@
             <nav class="flex items-center gap-6">
                 <a href="{{ route('portfolio.index') }}"
                    class="text-sm font-medium text-slate-500 hover:text-brand-700 transition-colors duration-200">
-                    Veja nosso portfólio
+                    Veja Exemplos de Sites
                 </a>
                 <a href="{{ route('contact.human') }}"
                    class="text-sm font-medium text-brand-700 hover:text-brand-800 transition-colors duration-200 flex items-center gap-1">
