@@ -4,12 +4,21 @@
 
 @section('content')
 
-<div class="min-h-screen bg-white text-slate-800 flex">
+<div class="min-h-screen bg-white text-slate-800 flex"
+     x-data="{ menuOpen: false }"
+     @keydown.escape.window="menuOpen = false">
+
+    {{-- Fundo escuro atrás do menu (só no mobile/tablet) --}}
+    <div x-show="menuOpen" x-cloak x-transition.opacity
+         @click="menuOpen = false"
+         class="fixed inset-0 bg-slate-900/40 z-40 lg:hidden"></div>
 
     <aside class="w-64 min-h-screen bg-white border-r border-purple-100
-                  flex flex-col fixed left-0 top-0 bottom-0 z-50 shadow-sm">
+                  flex flex-col fixed left-0 top-0 bottom-0 z-50 shadow-sm overflow-y-auto
+                  transition-transform duration-200 -translate-x-full lg:translate-x-0"
+           :class="menuOpen ? '!translate-x-0' : ''">
 
-        <div class="px-6 py-8 border-b border-purple-100">
+        <div class="px-6 py-8 border-b border-purple-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-purple-800
                             flex items-center justify-center shadow-lg shadow-purple-200">
@@ -20,6 +29,9 @@
                     <p class="text-[10px] text-purple-500 tracking-[0.25em]">ESTILO • DISCIPLINA</p>
                 </div>
             </div>
+            <button @click="menuOpen = false"
+                    class="lg:hidden p-2 -mr-2 text-slate-400 hover:text-slate-700"
+                    aria-label="Fechar menu">✕</button>
         </div>
 
         <nav class="flex-1 px-4 py-6">
@@ -63,18 +75,25 @@
 
 
     <!-- ÁREA PRINCIPAL -->
-    <main class="ml-64 flex-1 min-h-screen bg-slate-50">
+    <main class="lg:ml-64 flex-1 min-w-0 min-h-screen bg-slate-50">
 
-        <header class="h-20 border-b border-purple-100 bg-white/80 backdrop-blur-xl
-                       flex items-center justify-between px-8">
-            <div>
+        <header class="h-16 sm:h-20 border-b border-purple-100 bg-white/80 backdrop-blur-xl
+                       flex items-center gap-3 px-4 sm:px-8">
+            <button @click="menuOpen = true"
+                    class="lg:hidden p-2 -ml-2 rounded-lg text-slate-600 hover:bg-purple-50"
+                    aria-label="Abrir menu">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <div class="min-w-0">
                 <a href="{{ Route::has('barbearia.agenda') ? route('barbearia.agenda') : '#' }}"
                    class="text-sm text-purple-500 hover:text-purple-700">← Voltar para a agenda</a>
-                <h2 class="text-xl font-semibold mt-1 text-slate-900">Todos os agendamentos</h2>
+                <h2 class="text-lg sm:text-xl font-semibold mt-1 text-slate-900 truncate">Todos os agendamentos</h2>
             </div>
         </header>
 
-        <div class="p-8">
+        <div class="p-4 sm:p-6 lg:p-8">
 
             @php
                 // Nome do mês/ano atual em português, sem depender do locale configurado no Laravel
@@ -110,7 +129,7 @@
             @endphp
 
             <!-- RESUMO FINANCEIRO DO MÊS -->
-            <div class="bg-white border border-purple-100 rounded-2xl p-6 shadow-sm mb-6">
+            <div class="bg-white border border-purple-100 rounded-2xl p-4 sm:p-6 shadow-sm mb-6">
 
                 <div class="flex items-center justify-between mb-6">
                     <div>
@@ -158,7 +177,8 @@
                 </div>
 
                 <!-- LUCRO -->
-                <div class="flex items-center justify-between rounded-xl bg-purple-600/5 border border-purple-100 px-5 py-4 mb-8">
+                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between
+                            rounded-xl bg-purple-600/5 border border-purple-100 px-4 sm:px-5 py-4 mb-8">
                     <span class="text-sm text-slate-500">Lucro estimado (faturamento − gastos)</span>
                     <span class="text-lg font-bold text-purple-700">
                         R$ {{ number_format($lucro, 2, ',', '.') }}
@@ -180,18 +200,24 @@
                     </div>
                 </div>
 
-                <div class="flex items-end gap-6 h-44 pt-8">
+                <div class="flex items-end gap-2 sm:gap-6 h-44 pt-8">
                     @foreach ($serieMes as $d)
-                        <div class="relative flex-1 flex flex-col items-center gap-1"
+                        <div class="relative flex-1 min-w-0 flex flex-col items-center gap-1"
                              x-data="{ open: false }"
                              @mouseenter="open = true"
-                             @mouseleave="open = false">
+                             @mouseleave="open = false"
+                             @click="open = true"
+                             @click.outside="open = false">
 
                             <!-- TOOLTIP DO GRÁFICO -->
                             <div x-show="open" x-cloak x-transition
                                  class="absolute bottom-full mb-2 z-50 w-52
                                         bg-white border border-purple-100 rounded-xl shadow-xl p-4
-                                        left-1/2 -translate-x-1/2">
+                                        {{ $loop->first
+                                            ? 'left-0 sm:left-1/2 sm:-translate-x-1/2'
+                                            : ($loop->last
+                                                ? 'right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2'
+                                                : 'left-1/2 -translate-x-1/2') }}">
                                 <p class="text-sm font-semibold text-slate-900">{{ $d['label'] }}</p>
                                 <p class="text-xs text-slate-500 mt-2 flex items-center justify-between gap-2">
                                     <span class="flex items-center gap-1.5">
@@ -236,11 +262,11 @@
             <!-- FILTROS -->
             <form method="GET" class="flex flex-wrap gap-3 mb-6">
                 <input type="date" name="data" value="{{ request('data') }}"
-                       class="rounded-xl border border-purple-100 px-4 py-2 text-sm text-slate-700
+                       class="w-full sm:w-auto rounded-xl border border-purple-100 px-4 py-2 text-sm text-slate-700
                               focus:outline-none focus:ring-2 focus:ring-purple-300">
 
                 <select name="status"
-                        class="rounded-xl border border-purple-100 px-4 py-2 text-sm text-slate-700
+                        class="w-full sm:w-auto rounded-xl border border-purple-100 px-4 py-2 text-sm text-slate-700
                                focus:outline-none focus:ring-2 focus:ring-purple-300">
                     <option value="">Todos os status</option>
                     <option value="confirmado" @selected(request('status') === 'confirmado')>Confirmado</option>
@@ -248,14 +274,14 @@
                 </select>
 
                 <button type="submit"
-                        class="rounded-xl bg-purple-600 text-white px-5 py-2 text-sm font-medium
+                        class="flex-1 sm:flex-none rounded-xl bg-purple-600 text-white px-5 py-2 text-sm font-medium
                                hover:bg-purple-700 transition-colors duration-200">
                     Filtrar
                 </button>
 
                 @if (request('data') || request('status'))
                     <a href="{{ url()->current() }}"
-                       class="rounded-xl border border-purple-100 text-purple-600 px-5 py-2 text-sm font-medium
+                       class="flex-1 sm:flex-none text-center rounded-xl border border-purple-100 text-purple-600 px-5 py-2 text-sm font-medium
                               hover:bg-purple-50 transition-colors duration-200">
                         Limpar filtros
                     </a>
@@ -326,44 +352,51 @@
                                 fn ($n) => $bancoFotosCortes[($inicioFotos + $n) % $totalFotos]
                             );
                         @endphp
-                        <div class="appointment relative flex items-center gap-5 px-6 py-5
+                        <div class="appointment relative flex flex-wrap sm:flex-nowrap items-center gap-x-4 sm:gap-x-5 gap-y-2
+                                    px-4 sm:px-6 py-4 sm:py-5
                                     hover:bg-purple-50/60 transition-colors duration-150
                                     {{ $index === 0 ? 'rounded-t-2xl' : '' }}
                                     {{ $index === count($agendamentosFiltrados) - 1 ? 'rounded-b-2xl' : '' }}"
-                             x-data="{ open: false, flip: false }"
-                             @mouseenter="
-                                const rect = $el.getBoundingClientRect();
-                                flip = (window.innerHeight - rect.bottom) < 170;
-                                open = true;
-                             "
-                             @mouseleave="open = false">
+                             x-data="{
+                                open: false,
+                                flip: false,
+                                abrir() {
+                                    const rect = this.$el.getBoundingClientRect();
+                                    this.flip = (window.innerHeight - rect.bottom) < 320;
+                                    this.open = true;
+                                }
+                             }"
+                             @mouseenter="abrir()"
+                             @click="abrir()"
+                             @mouseleave="open = false"
+                             @click.outside="open = false">
 
-                            <div class="text-sm font-semibold text-purple-600 w-24">
-                                {{ $ag['data'] }} <br>
+                            <div class="text-sm font-semibold text-purple-600 w-full sm:w-24 flex sm:block items-center gap-2">
+                                {{ $ag['data'] }} <br class="hidden sm:block">
                                 <span class="text-slate-400">{{ $ag['hora'] }}</span>
                             </div>
 
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-800
+                            <div class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-purple-800
                                         flex items-center justify-center text-white font-medium">
                                 {{ $ag['inicial'] }}
                             </div>
 
-                            <div class="flex-1 cursor-default">
-                                <p class="font-medium text-slate-900">{{ $ag['nome'] }}</p>
-                                <p class="text-xs text-slate-400 mt-1">{{ $ag['servico'] }}</p>
+                            <div class="flex-1 min-w-0 cursor-default">
+                                <p class="font-medium text-slate-900 truncate">{{ $ag['nome'] }}</p>
+                                <p class="text-xs text-slate-400 mt-1 truncate">{{ $ag['servico'] }}</p>
                             </div>
 
-                            <span class="text-xs px-3 py-1.5 rounded-full
+                            <span class="shrink-0 text-xs px-3 py-1.5 rounded-full
                                          {{ $ag['status'] === 'Confirmado'
                                                 ? 'bg-emerald-50 text-emerald-600'
                                                 : 'bg-amber-50 text-amber-600' }}">
                                 {{ $ag['status'] }}
                             </span>
 
-                                                        <!-- TOOLTIP DO CLIENTE: abre pra cima (flip) quando não há espaço embaixo -->
+                            <!-- TOOLTIP DO CLIENTE: abre pra cima (flip) quando não há espaço embaixo -->
                             <div x-show="open" x-cloak x-transition
                                  :class="flip ? 'bottom-full mb-1' : 'top-full mt-1'"
-                                 class="absolute left-28 z-50 w-72
+                                 class="absolute left-4 right-4 sm:right-auto sm:left-28 sm:w-72 z-50
                                         bg-white border border-purple-100 rounded-xl shadow-xl p-4">
 
                                 <p class="text-sm font-semibold text-slate-900">{{ $ag['nome'] }}</p>

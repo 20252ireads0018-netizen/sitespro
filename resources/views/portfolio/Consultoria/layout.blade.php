@@ -247,6 +247,78 @@
             main article:hover, main > .grid.grid-cols-2 > div:hover { transform: none; }
             .blob-bg span { animation: none !important; }
         }
+
+                /* ---------- Responsivo: cards ---------- */
+        main article { min-width: 0; overflow-wrap: anywhere; }
+
+        @media (max-width: 640px) {
+            main article { padding: 1rem; }
+            main > .grid.grid-cols-2 { gap: .75rem; }
+            main > .grid.grid-cols-2 > div { padding: .875rem; min-width: 0; }
+            main > .grid.grid-cols-2 .font-display { font-size: 1.25rem; }
+        }
+
+        /* telas muito estreitas: cards de resumo em uma coluna */
+        @media (max-width: 380px) {
+            main > .grid.grid-cols-2 { grid-template-columns: 1fr; }
+        }
+
+        /* dispositivos touch: sem "pulo" no hover */
+        @media (hover: none) {
+            main article:hover,
+            main > .grid.grid-cols-2 > div:hover { transform: none; }
+        }
+
+        /* ---------- Responsivo: tabelas ---------- */
+        /* Tablet: rolagem horizontal como segurança */
+        @media (max-width: 1023px) and (min-width: 768px) {
+            main table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
+
+        /* Mobile: cada linha vira um cartão */
+        @media (max-width: 767px) {
+            main table:not(.tabela-scroll),
+            main table:not(.tabela-scroll) tbody,
+            main table:not(.tabela-scroll) tr,
+            main table:not(.tabela-scroll) td { display: block; width: 100%; }
+
+            main table:not(.tabela-scroll) thead {
+                position: absolute; width: 1px; height: 1px;
+                overflow: hidden; clip: rect(0 0 0 0);
+            }
+            main table:not(.tabela-scroll) tbody tr {
+                background: #fff;
+                border: 1px solid #d6dde7;
+                border-radius: .5rem;
+                margin-bottom: .75rem;
+                padding: .25rem 0;
+                box-shadow: 0 1px 2px rgba(20,23,27,.05);
+            }
+            main table:not(.tabela-scroll) td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 1rem;
+                text-align: right;
+                padding: .5rem 1rem !important;
+                border: 0 !important;
+            }
+            main table:not(.tabela-scroll) td::before {
+                content: attr(data-label);
+                flex-shrink: 0;
+                text-align: left;
+                font-size: .7rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .04em;
+                color: #647389;
+            }
+            main table:not(.tabela-scroll) td:not([data-label])::before { display: none; }
+            main tbody tr:hover td:first-child { box-shadow: none; }
+        }
+
+        /* tabela larga que prefira rolagem no mobile: use class="tabela-scroll" */
+        main .tabela-scroll { display: block; overflow-x: auto; white-space: nowrap; }
     </style>
 </head>
 <body class="font-sans text-studio-900 antialiased" x-data="{
@@ -365,4 +437,26 @@
     </div>
 
 </body>
+
+<script>
+    (function () {
+        function rotular() {
+            document.querySelectorAll('main table').forEach(function (t) {
+                var cab = Array.from(t.querySelectorAll('thead th')).map(function (th) {
+                    return th.textContent.trim();
+                });
+                t.querySelectorAll('tbody tr').forEach(function (tr) {
+                    Array.from(tr.children).forEach(function (td, i) {
+                        if (cab[i] && !td.dataset.label) td.dataset.label = cab[i];
+                    });
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            rotular();
+            new MutationObserver(rotular).observe(document.querySelector('main'), { childList: true, subtree: true });
+        });
+    })();
+</script>
+
 </html>

@@ -44,9 +44,28 @@
 
     <style>
         [x-cloak] { display: none !important; }
-        body { background-color: #faf7f5; }
+        body { background-color: #faf7f5; overflow-x: clip; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-thumb { background-color: #ecabb5; border-radius: 999px; }
+
+        /* =====================================================
+           RESPONSIVIDADE GLOBAL (vale para todas as páginas)
+           ===================================================== */
+        main { min-width: 0; }
+        main img, main svg { max-width: 100%; }
+
+        @media (max-width: 1023px) {
+            /* Sidebar acompanha a altura real da tela em navegadores mobile */
+            aside.fixed { height: 100vh; height: 100dvh; max-width: 85vw; }
+        }
+
+        @media (max-width: 639px) {
+            /* Tabelas rolam na horizontal em vez de quebrar o layout */
+            .overflow-x-auto > table { min-width: 640px; }
+
+            /* Linhas "título ... ação" quebram em vez de espremer */
+            main .flex.items-center.justify-between { flex-wrap: wrap; gap: .75rem; }
+        }
     </style>
 </head>
 <body class="font-sans text-aura-900 antialiased" x-data="{
@@ -54,16 +73,21 @@
         avisoAberto: false,
         mensagemAviso: 'Este é um site ilustrativo, criado apenas como exemplo de portfólio. Nenhuma ação aqui é real.'
     }"
+    x-effect="document.body.classList.toggle('overflow-hidden', sidebarAberta)"
+    @keydown.escape.window="sidebarAberta = false; avisoAberto = false"
+    @resize.window="if (window.innerWidth >= 1024) sidebarAberta = false"
     @abrir-aviso.window="mensagemAviso = $event.detail?.mensagem || mensagemAviso; avisoAberto = true">
 
     <div class="flex min-h-screen">
 
         {{-- Sidebar --}}
         <aside
-            class="fixed z-30 inset-y-0 left-0 w-64 bg-white border-r border-aura-100 transform transition-transform duration-200 lg:translate-x-0 lg:static lg:flex lg:flex-col"
+            class="fixed z-30 inset-y-0 left-0 w-64 shrink-0 bg-white border-r border-aura-100 flex flex-col overflow-y-auto
+                   transform transition-transform duration-200
+                   lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:self-start"
             :class="sidebarAberta ? 'translate-x-0' : '-translate-x-full'"
         >
-            <div class="h-20 flex items-center gap-3 px-6 border-b border-aura-100">
+            <div class="h-20 shrink-0 flex items-center gap-3 px-6 border-b border-aura-100">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-aura-400 to-gold-500 flex items-center justify-center text-white font-display text-xl">A</div>
                 <div>
                     <p class="font-display text-xl leading-none text-aura-800">Clínica Aura</p>
@@ -85,6 +109,7 @@
                 @foreach ($itensNav as $item)
                     @php $ativo = request()->routeIs($item['rota']); @endphp
                     <a href="{{ route($item['rota']) }}"
+                       @click="sidebarAberta = false"
                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition
                               {{ $ativo ? 'bg-aura-50 text-aura-700 font-medium' : 'text-aura-800/70 hover:bg-aura-50/70 hover:text-aura-700' }}">
                         <span class="w-2 h-2 rounded-full {{ $ativo ? 'bg-gold-500' : 'bg-aura-200' }}"></span>
@@ -102,30 +127,34 @@
         </aside>
 
         {{-- Overlay mobile --}}
-        <div x-show="sidebarAberta" x-cloak @click="sidebarAberta = false"
+        <div x-show="sidebarAberta" x-cloak x-transition.opacity @click="sidebarAberta = false"
              class="fixed inset-0 bg-black/30 z-20 lg:hidden"></div>
 
         {{-- Conteúdo --}}
         <div class="flex-1 flex flex-col min-w-0">
 
-            <header class="h-20 bg-white/80 backdrop-blur border-b border-aura-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-10">
-                <div class="flex items-center gap-3">
-                    <button @click="sidebarAberta = !sidebarAberta" class="lg:hidden p-2 rounded-lg hover:bg-aura-50">
+            <header class="h-20 bg-white/80 backdrop-blur border-b border-aura-100 flex items-center justify-between gap-3 px-4 sm:px-8 sticky top-0 z-10">
+                <div class="flex items-center gap-3 min-w-0">
+                    <button @click="sidebarAberta = !sidebarAberta"
+                            aria-label="Abrir menu"
+                            :aria-expanded="sidebarAberta.toString()"
+                            class="lg:hidden shrink-0 p-2 rounded-lg hover:bg-aura-50">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-aura-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
-                    <div>
-                        <h1 class="font-display text-2xl text-aura-800">@yield('titulo', 'Painel')</h1>
-                        <p class="text-xs text-aura-500">@yield('subtitulo', ' ')</p>
+                    <div class="min-w-0">
+                        <h1 class="font-display text-2xl text-aura-800 truncate">@yield('titulo', 'Painel')</h1>
+                        <p class="text-xs text-aura-500 truncate">@yield('subtitulo', ' ')</p>
                     </div>
                 </div>
 
                 <button
                     @click="$dispatch('abrir-aviso')"
-                    class="hidden sm:inline-flex items-center gap-2 text-xs font-medium text-aura-600 border border-aura-200 rounded-full px-4 py-2 hover:bg-aura-50 transition">
+                    class="shrink-0 inline-flex items-center gap-2 text-xs font-medium text-aura-600 border border-aura-200 rounded-full px-3 sm:px-4 py-2 hover:bg-aura-50 transition">
                     <span class="w-1.5 h-1.5 rounded-full bg-gold-500"></span>
-                    Site de demonstração
+                    <span class="hidden sm:inline">Site de demonstração</span>
+                    <span class="sm:hidden">Demo</span>
                 </button>
             </header>
 
