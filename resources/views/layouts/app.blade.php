@@ -74,7 +74,7 @@
         <div class="max-w-5xl mx-auto px-6 py-6 text-sm text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
             <span>&copy; {{ date('Y') }} Web-Sight. Todos os direitos reservados.</span>
             <span class="flex items-center gap-4">
-                <a href="{{ route('portfolio.index') }}" class="hover:text-brand-600 transition-colors duration-200">Portfólio</a>
+                <a href="{{ route('portfolio.index') }}" class="hover:text-brand-600 transition-colors duration-200">Sites de Exemplo</a>
                 <span>Feito para transformar seu negócio em um site profissional.</span>
             </span>
         </div>

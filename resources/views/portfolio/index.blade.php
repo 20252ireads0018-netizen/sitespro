@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Nosso portfólio')
+@section('title', 'Sites de exemplo')
 
 @section('content')
 <div class="max-w-6xl mx-auto px-6 py-14">
@@ -28,35 +28,35 @@
                     'descricao' => 'Catálogo de produtos com filtros por categoria e botão de compra direto no WhatsApp.',
                     'tag' => 'E-commerce',
                     'cor' => 'from-pink-400 to-rose-500',
-                    'url' => '#',
+                    'url' => '/siteLoja',
                 ],
                 [
                     'titulo' => 'Consultoria financeira',
                     'descricao' => 'Site institucional com formulário de contato e agendamento de reuniões online.',
                     'tag' => 'Institucional',
                     'cor' => 'from-brand-500 to-brand-700',
-                    'url' => '#',
+                    'url' => '/siteConsultoria',
                 ],
                 [
                     'titulo' => 'Restaurante e delivery',
                     'descricao' => 'Cardápio digital, pedidos online e integração com apps de entrega.',
                     'tag' => 'Delivery',
                     'cor' => 'from-amber-400 to-orange-500',
-                    'url' => '#',
+                    'url' => '/siteDelivery',
                 ],
                 [
                     'titulo' => 'Estúdio de arquitetura',
                     'descricao' => 'Portfólio visual com galeria de projetos e página de contato para orçamentos.',
                     'tag' => 'Portfólio',
                     'cor' => 'from-slate-500 to-slate-700',
-                    'url' => '#',
+                    'url' => '/siteEstudio',
                 ],
                 [
                     'titulo' => 'Clínica de estética',
                     'descricao' => 'Página de serviços com agendamento online e depoimentos de clientes.',
                     'tag' => 'Serviços',
                     'cor' => 'from-emerald-400 to-teal-600',
-                    'url' => '#',
+                    'url' => '/siteClinica',
                 ],
                 [
                     'titulo' => 'Barbearia Purple Elegance',

@@ -278,6 +278,25 @@
                             ['hora' => '18:00', 'data' => '25/09/2026', 'inicial' => 'T', 'nome' => 'Thiago Lima', 'servico' => 'Corte masculino', 'status' => 'Pendente', 'telefone' => '(11) 94444-1111', 'email' => 'thiago.lima@email.com'],
                         ];
 
+                        $precosServico = [
+                            'Corte masculino'     => 45.00,
+                            'Barba + Sobrancelha' => 55.00,
+                            'Corte + Barba'       => 70.00,
+                            'Sobrancelha'         => 20.00,
+                            'Barba'               => 30.00,
+                        ];
+
+                        $bancoFotosCortes = [
+                            'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=300&h=300&fit=crop',
+                            'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300&h=300&fit=crop',
+                            'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=300&h=300&fit=crop',
+                            'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=300&h=300&fit=crop',
+                            'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=300&h=300&fit=crop',
+                            'https://images.unsplash.com/photo-1503236823255-94609f598e71?w=300&h=300&fit=crop',
+                            'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=300&h=300&fit=crop',
+                            'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=300&h=300&fit=crop',
+                        ];
+
                         $dataFiltro = request('data');   // formato Y-m-d (padrão do <input type="date">)
                         $statusFiltro = request('status');
 
@@ -299,6 +318,14 @@
                     @endphp
 
                     @forelse ($agendamentosFiltrados as $index => $ag)
+                        @php
+                            $precoAg = $precosServico[$ag['servico']] ?? 45.00;
+                            $totalFotos = count($bancoFotosCortes);
+                            $inicioFotos = $index % $totalFotos;
+                            $fotosCorte = collect(range(0, 3))->map(
+                                fn ($n) => $bancoFotosCortes[($inicioFotos + $n) % $totalFotos]
+                            );
+                        @endphp
                         <div class="appointment relative flex items-center gap-5 px-6 py-5
                                     hover:bg-purple-50/60 transition-colors duration-150
                                     {{ $index === 0 ? 'rounded-t-2xl' : '' }}
@@ -333,11 +360,12 @@
                                 {{ $ag['status'] }}
                             </span>
 
-                            <!-- TOOLTIP DO CLIENTE: abre pra cima (flip) quando não há espaço embaixo -->
+                                                        <!-- TOOLTIP DO CLIENTE: abre pra cima (flip) quando não há espaço embaixo -->
                             <div x-show="open" x-cloak x-transition
                                  :class="flip ? 'bottom-full mb-1' : 'top-full mt-1'"
-                                 class="absolute left-28 z-50 w-64
+                                 class="absolute left-28 z-50 w-72
                                         bg-white border border-purple-100 rounded-xl shadow-xl p-4">
+
                                 <p class="text-sm font-semibold text-slate-900">{{ $ag['nome'] }}</p>
                                 <p class="text-xs text-slate-500 mt-2 flex items-center gap-2">
                                     <span class="text-purple-500">☏</span> {{ $ag['telefone'] }}
@@ -345,6 +373,23 @@
                                 <p class="text-xs text-slate-500 mt-1 flex items-center gap-2">
                                     <span class="text-purple-500">✉</span> {{ $ag['email'] }}
                                 </p>
+
+                                {{-- Card do corte: 4 fotos + preço --}}
+                                <div class="mt-3 pt-3 border-t border-purple-50">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-xs font-medium text-slate-700">{{ $ag['servico'] }}</p>
+                                        <span class="text-xs font-semibold text-purple-700 bg-purple-50 rounded-full px-2.5 py-1">
+                                            R$ {{ number_format($precoAg, 2, ',', '.') }}
+                                        </span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-1.5">
+                                        @foreach ($fotosCorte as $foto)
+                                            <img src="{{ $foto }}"
+                                                 alt="Exemplo de {{ $ag['servico'] }}"
+                                                 class="w-full h-16 object-cover rounded-lg border border-purple-100">
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
 
                         </div>

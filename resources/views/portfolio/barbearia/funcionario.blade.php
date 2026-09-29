@@ -73,7 +73,10 @@
     </aside>
 
 
-    <main class="ml-64 flex-1 min-h-screen bg-slate-50">
+    {{-- x-data no <main>: todos os botões e o modal abaixo compartilham o mesmo estado "aviso" --}}
+    <main class="ml-64 flex-1 min-h-screen bg-slate-50"
+          x-data="{ aviso: false }"
+          @keydown.escape.window="aviso = false">
 
         <header class="h-20 border-b border-purple-100 bg-white/80 backdrop-blur-xl
                        flex items-center justify-between px-8">
@@ -84,8 +87,9 @@
         </header>
 
         @php
-            // Lista de funcionários ilustrativa (usada apenas quando a view não recebe $funcionarios).
-            $funcionarios = $funcionarios ?? [
+            // Lista de funcionários ilustrativa (usada quando a view não recebe $funcionarios
+            // ou quando ele chega vazio).
+            $funcionarios = !empty($funcionarios) ? $funcionarios : [
                 ['nome' => 'Lucas Almeida',   'cargo' => 'Barbeiro',           'telefone' => '(11) 98765-4321', 'email' => 'lucas.almeida@email.com',   'status' => 'Ativo',   'atendimentosMes' => 42],
                 ['nome' => 'Rafael Costa',    'cargo' => 'Barbeiro',           'telefone' => '(11) 91234-5678', 'email' => 'rafael.costa@email.com',    'status' => 'Ativo',   'atendimentosMes' => 38],
                 ['nome' => 'Gabriel Santos',  'cargo' => 'Barbeiro',           'telefone' => '(11) 99988-7766', 'email' => 'gabriel.santos@email.com',  'status' => 'Ativo',   'atendimentosMes' => 35],
@@ -97,119 +101,152 @@
                 ['nome' => 'Diego Ramos',     'cargo' => 'Barbeiro',           'telefone' => '(11) 92222-8899', 'email' => 'diego.ramos@email.com',     'status' => 'Ativo',   'atendimentosMes' => 29],
                 ['nome' => 'Eduardo Nunes',   'cargo' => 'Auxiliar de limpeza','telefone' => '(11) 91111-4455', 'email' => 'eduardo.nunes@email.com',   'status' => 'Ativo',   'atendimentosMes' => 0],
             ];
+
+            $totalAtivos = count(array_filter($funcionarios, function ($f) {
+                return ($f['status'] ?? 'Inativo') === 'Ativo';
+            }));
+
+            $totalAtendimentos = array_sum(array_column($funcionarios, 'atendimentosMes'));
         @endphp
 
-        @php
-    $totalAtivos = count(array_filter($funcionarios, function ($f) {
-        return $f['status'] === 'Ativo';
-    }));
+        <div class="p-8">
 
-    $totalAtendimentos = array_sum(array_column($funcionarios, 'atendimentosMes'));
-@endphp
+            <div class="bg-white border border-purple-100 rounded-2xl p-6 shadow-sm mb-6">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">Equipe</h2>
+                        <p class="text-sm text-slate-400 mt-1">
+                            Funcionários cadastrados na barbearia
+                        </p>
+                    </div>
 
-<div class="p-8">
+                    <div class="flex items-center gap-6">
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-slate-900">{{ count($funcionarios) }}</p>
+                            <p class="text-xs text-slate-400 mt-1">Funcionários</p>
+                        </div>
 
-    <div class="bg-white border border-purple-100 rounded-2xl p-6 shadow-sm mb-6">
-        <div class="flex items-center justify-between flex-wrap gap-4">
-            <div>
-                <h2 class="text-lg font-semibold text-slate-900">Equipe</h2>
-                <p class="text-sm text-slate-400 mt-1">
-                    Funcionários cadastrados na barbearia
-                </p>
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-emerald-600">{{ $totalAtivos }}</p>
+                            <p class="text-xs text-slate-400 mt-1">Ativos</p>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-purple-600">{{ $totalAtendimentos }}</p>
+                            <p class="text-xs text-slate-400 mt-1">Atendimentos no mês</p>
+                        </div>
+
+                        <button type="button"
+                                @click="aviso = true"
+                                class="px-4 py-2.5 rounded-xl bg-purple-600 text-white text-sm font-medium shadow-md shadow-purple-200 hover:bg-purple-700 transition-colors">
+                            + Novo funcionário
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex items-center gap-6">
-                <div class="text-center">
-                    <p class="text-2xl font-bold text-slate-900">{{ count($funcionarios) }}</p>
-                    <p class="text-xs text-slate-400 mt-1">Funcionários</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                @forelse ($funcionarios as $f)
+                    <div class="bg-white border border-purple-100 rounded-2xl p-5 shadow-sm">
+
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-800 flex items-center justify-center text-white font-semibold">
+                                {{ strtoupper(substr($f['nome'] ?? '?', 0, 1)) }}
+                            </div>
+
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-slate-900 truncate">
+                                    {{ $f['nome'] ?? 'Sem nome' }}
+                                </p>
+                                <p class="text-xs text-slate-400">
+                                    {{ $f['cargo'] ?? '—' }}
+                                </p>
+                            </div>
+
+                            <span class="text-xs px-3 py-1.5 rounded-full whitespace-nowrap
+                                {{ ($f['status'] ?? 'Inativo') === 'Ativo' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500' }}">
+                                {{ $f['status'] ?? 'Inativo' }}
+                            </span>
+                        </div>
+
+                        <div class="space-y-1.5 text-xs text-slate-500 mb-4">
+                            <p class="flex items-center gap-2">
+                                <span class="text-purple-500">☏</span>
+                                {{ $f['telefone'] ?? '—' }}
+                            </p>
+
+                            <p class="flex items-center gap-2 truncate">
+                                <span class="text-purple-500">✉</span>
+                                {{ $f['email'] ?? '—' }}
+                            </p>
+                        </div>
+
+                        <div class="rounded-xl bg-purple-50/60 border border-purple-100 px-4 py-3 flex items-center justify-between mb-4">
+                            <span class="text-xs text-slate-500">Atendimentos no mês</span>
+                            <span class="text-sm font-semibold text-purple-700">
+                                {{ $f['atendimentosMes'] ?? 0 }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button type="button"
+                                    @click="aviso = true"
+                                    class="flex-1 px-3 py-2 rounded-lg bg-purple-50 text-purple-700 text-xs font-medium border border-purple-100 hover:bg-purple-100">
+                                Editar
+                            </button>
+
+                            <button type="button"
+                                    @click="aviso = true"
+                                    class="flex-1 px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-medium border border-red-100 hover:bg-red-100">
+                                Excluir
+                            </button>
+                        </div>
+
+                    </div>
+                @empty
+                    <p class="text-sm text-slate-400 italic col-span-full">
+                        Nenhum funcionário cadastrado.
+                    </p>
+                @endforelse
+
+            </div>
+        </div>
+
+        {{-- POPUP: aviso de site ilustrativo (aberto por qualquer botão de ação da página) --}}
+        <div x-show="aviso" x-cloak
+             x-transition.opacity
+             class="fixed inset-0 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+             style="z-index: 100;"
+             role="dialog" aria-modal="true" aria-labelledby="aviso-titulo"
+             @click.self="aviso = false">
+
+            <div x-show="aviso"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-purple-100 p-6 text-center">
+
+                <div class="mx-auto w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center text-2xl text-purple-600 mb-4">
+                    ⓘ
                 </div>
 
-                <div class="text-center">
-                    <p class="text-2xl font-bold text-emerald-600">{{ $totalAtivos }}</p>
-                    <p class="text-xs text-slate-400 mt-1">Ativos</p>
-                </div>
+                <h3 id="aviso-titulo" class="text-lg font-semibold text-slate-900">
+                    Site ilustrativo
+                </h3>
 
-                <div class="text-center">
-                    <p class="text-2xl font-bold text-purple-600">{{ $totalAtendimentos }}</p>
-                    <p class="text-xs text-slate-400 mt-1">Atendimentos no mês</p>
-                </div>
+                <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                    Este site é apenas um <strong class="text-purple-600">exemplo ilustrativo</strong>.
+                    As ações de criar, editar e excluir não são realizadas de verdade.
+                </p>
 
-                <button type="button"
-                        @click="$store.aviso.open = true"
-                        class="px-4 py-2.5 rounded-xl bg-purple-600 text-white text-sm font-medium shadow-md shadow-purple-200 hover:bg-purple-700 transition-colors">
-                    + Novo funcionário
+                <button type="button" @click="aviso = false"
+                        class="mt-6 w-full px-4 py-2.5 rounded-xl bg-purple-600 text-white text-sm font-medium
+                               shadow-md shadow-purple-200 hover:bg-purple-700 transition-colors">
+                    Entendi
                 </button>
             </div>
         </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-        @forelse ($funcionarios as $f)
-            <div class="bg-white border border-purple-100 rounded-2xl p-5 shadow-sm">
-
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-800 flex items-center justify-center text-white font-semibold">
-                        {{ strtoupper(substr($f['nome'] ?? '?', 0, 1)) }}
-                    </div>
-
-                    <div class="flex-1 min-w-0">
-                        <p class="font-medium text-slate-900 truncate">
-                            {{ $f['nome'] ?? 'Sem nome' }}
-                        </p>
-                        <p class="text-xs text-slate-400">
-                            {{ $f['cargo'] ?? '—' }}
-                        </p>
-                    </div>
-
-                    <span class="text-xs px-3 py-1.5 rounded-full whitespace-nowrap
-                        {{ ($f['status'] ?? 'Inativo') === 'Ativo' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500' }}">
-                        {{ $f['status'] ?? 'Inativo' }}
-                    </span>
-                </div>
-
-                <div class="space-y-1.5 text-xs text-slate-500 mb-4">
-                    <p class="flex items-center gap-2">
-                        <span class="text-purple-500">☏</span>
-                        {{ $f['telefone'] ?? '—' }}
-                    </p>
-
-                    <p class="flex items-center gap-2 truncate">
-                        <span class="text-purple-500">✉</span>
-                        {{ $f['email'] ?? '—' }}
-                    </p>
-                </div>
-
-                <div class="rounded-xl bg-purple-50/60 border border-purple-100 px-4 py-3 flex items-center justify-between mb-4">
-                    <span class="text-xs text-slate-500">Atendimentos no mês</span>
-                    <span class="text-sm font-semibold text-purple-700">
-                        {{ $f['atendimentosMes'] ?? 0 }}
-                    </span>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <button type="button"
-                            @click="$store.aviso.open = true"
-                            class="flex-1 px-3 py-2 rounded-lg bg-purple-50 text-purple-700 text-xs font-medium border border-purple-100 hover:bg-purple-100">
-                        Editar
-                    </button>
-
-                    <button type="button"
-                            @click="$store.aviso.open = true"
-                            class="flex-1 px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-medium border border-red-100 hover:bg-red-100">
-                        Excluir
-                    </button>
-                </div>
-
-            </div>
-        @empty
-            <p class="text-sm text-slate-400 italic col-span-full">
-                Nenhum funcionário cadastrado.
-            </p>
-        @endforelse
-
-    </div>
-</div>
 
     </main>
 

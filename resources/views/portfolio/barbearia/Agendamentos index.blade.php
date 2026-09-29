@@ -280,9 +280,22 @@
                             ['hora' => '14:00', 'data' => '27/09/2026', 'inicial' => 'D', 'nome' => 'Diego Ramos',      'servico' => 'Barba',                'status' => 'Confirmado', 'telefone' => '(11) 92222-8899', 'email' => 'diego.ramos@email.com'],
                             ['hora' => '17:30', 'data' => '27/09/2026', 'inicial' => 'E', 'nome' => 'Eduardo Nunes',    'servico' => 'Sobrancelha',          'status' => 'Confirmado', 'telefone' => '(11) 91111-4455', 'email' => 'eduardo.nunes@email.com'],
                         ];
+                        $precosServico = [
+                            'Corte masculino'     => 45.00,
+                            'Barba + Sobrancelha' => 55.00,
+                            'Corte + Barba'       => 70.00,
+                            'Sobrancelha'         => 20.00,
+                            'Barba'               => 30.00,
+                        ];
                     @endphp
 
                     @forelse ($agendamentos as $index => $ag)
+                        @php
+                            $precoAg = $precosServico[$ag['servico']] ?? 45.00;
+                            $fotosCorte = collect(range(1, 4))->map(
+                                fn ($n) => "https://picsum.photos/seed/{$ag['nome']}-{$n}/200/200"
+                            );
+                        @endphp
                         <div class="appointment relative flex items-center gap-5 px-6 py-5
                                     hover:bg-purple-50/60 transition-colors duration-150
                                     {{ $index === 0 ? 'rounded-t-2xl' : '' }}
@@ -317,11 +330,12 @@
                                 {{ $ag['status'] }}
                             </span>
 
-                            <!-- TOOLTIP DO CLIENTE: abre pra cima (flip) quando não há espaço embaixo -->
+                                                        <!-- TOOLTIP DO CLIENTE: abre pra cima (flip) quando não há espaço embaixo -->
                             <div x-show="open" x-cloak x-transition
                                  :class="flip ? 'bottom-full mb-1' : 'top-full mt-1'"
-                                 class="absolute left-28 z-50 w-64
+                                 class="absolute left-28 z-50 w-72
                                         bg-white border border-purple-100 rounded-xl shadow-xl p-4">
+
                                 <p class="text-sm font-semibold text-slate-900">{{ $ag['nome'] }}</p>
                                 <p class="text-xs text-slate-500 mt-2 flex items-center gap-2">
                                     <span class="text-purple-500">☏</span> {{ $ag['telefone'] }}
@@ -329,6 +343,23 @@
                                 <p class="text-xs text-slate-500 mt-1 flex items-center gap-2">
                                     <span class="text-purple-500">✉</span> {{ $ag['email'] }}
                                 </p>
+
+                                {{-- Card do corte: 4 fotos + preço --}}
+                                <div class="mt-3 pt-3 border-t border-purple-50">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-xs font-medium text-slate-700">{{ $ag['servico'] }}</p>
+                                        <span class="text-xs font-semibold text-purple-700 bg-purple-50 rounded-full px-2.5 py-1">
+                                            R$ {{ number_format($precoAg, 2, ',', '.') }}
+                                        </span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-1.5">
+                                        @foreach ($fotosCorte as $foto)
+                                            <img src="{{ $foto }}"
+                                                 alt="Exemplo de {{ $ag['servico'] }}"
+                                                 class="w-full h-16 object-cover rounded-lg border border-purple-100">
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
